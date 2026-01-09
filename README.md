@@ -1,51 +1,143 @@
-# Portfolio Rebalancing Notes
+# Portfolio Rebalancing System
 
-## Concepts
+This project implements a **simple portfolio rebalancing system** with:
+- **Backend**: FastAPI (/api)  
+- **Frontend**: React component (portfolio-pie)  
+- **Visualization**: Pie chart using recharts  
+- **Deployment**: Vercel  
 
-- **Stock**: Represents a minimal part of a company.  
-  - Attributes: \`key\` (ticker), \`price\`.  
-  - Methods: \`update_price(last_available_price)\`.
+The app demonstrates how a portfolio can be tracked and rebalanced based on **stock prices**, **target allocations**, and a **total investment amount**.
 
-- **Portfolio**: Holds multiple stocks and a target allocation.  
-  - Attributes: list of stocks with quantity and target allocation, total invested.  
-  - Methods:
-    - \`calculate_total_invested()\`: Computes current total value of the portfolio.  
-    - \`rebalance()\`: Adjusts stock quantities to match target allocation based on current prices.
+---
 
-## Example
+## Dependencies
 
-1. Initial investment: \$10,000  
-2. Target allocation: Apple 60%, Meta 40%  
-3. Stock prices: Apple \$25, Meta \$40  
+### Backend
+- Python 3.x  
+- FastAPI
+- Uvicorn (for local development)
 
-**Initial quantities**:  
-- Apple: 10,000 * 0.6 / 25 = 240 shares  
-- Meta: 10,000 * 0.4 / 40 = 100 shares  
+### Frontend
+- React 18+
+- Recharts
 
-**After price changes**:  
-- Apple \$20, Meta \$42 → total portfolio value: \$9,000  
-- New distribution:
-  - Apple ≈ 53.3%  
-  - Meta ≈ 46.7%  
+---
 
-**Rebalance target quantities**:  
-- Apple: 9,000 * 0.6 / 20 = 270 shares → buy 30 shares  
-- Meta: 9,000 * 0.4 / 42 ≈ 85.7 shares → sell 14.3 shares  
+## API
 
-## Data Structure
+### Base URL
+```
+https://portfolio-pink-nine-zqqb57t52q.vercel.app/docs
+```
 
-- \`invests\` list:  
-\`\`\`python
-invests = [
-    {"stock": Stock, "allocation": float},
-]
-\`\`\`
-- Each position tracks: stock, quantity, allocation.
+### Endpoints
 
-## Workflow
+| Method | Path             | Description |
+|--------|------------------|-------------|
+| GET    | `/portfolio`     | Returns the current portfolio including stock quantities, prices, and total invested value. |
+| POST   | `/update_price`  | Updates the price of a stock and automatically rebalances the portfolio. Request body: `{ "key": string, "price": float }`. |
+| POST   | `/restart`       | Resets the portfolio to its initial state (prices, quantities, allocations). |
 
-1. Create Stock instances.  
-2. Initialize Portfolio with investments and total amount.  
-3. Update stock prices with \`update_price()\`.  
-4. Call \`rebalance()\` to adjust quantities.  
-5. Use \`calculate_total_invested()\` to track portfolio value.
+---
+
+## Frontend
+
+### URL
+```
+https://portfolio-pi-iota.vercel.app/
+```
+
+### Features
+- Fetches current portfolio from the backend on component mount.  
+- Displays a **table** of stock quantities, prices, and share-based percentages.  
+- Displays a **pie chart** showing the **share distribution** (100% = total number of shares).  
+- Simple form to **update stock price** and automatically rebalance.  
+- Button to **restart portfolio** to initial state.
+
+---
+
+## Logic & Assumptions
+
+### 1. Total Investment
+Portfolio is initialized with a fixed total investment amount.
+
+### 2. Target Allocation
+Each stock has a target percentage allocation of the total investment.
+
+### 3. Initial Quantities
+Calculated as:
+```python
+quantity = (target_allocation * total_invest) / stock_price
+```
+
+### 4. Price Updates
+When a stock price changes:
+- Portfolio value is recalculated (`calculate_total_invested()`)
+- New target quantities are computed (`rebalance()`)
+- Difference determines shares to buy/sell
+
+### 5. Share-based Percentages
+Pie chart reflects percentage of shares, not value or target allocation:
+```python
+% of shares = stock_quantity / total_quantity
+```
+
+### Assumptions
+- Quantities can be fractional for simplicity
+- Portfolio rebalancing occurs automatically on price update
+- All operations are in-memory, no database is used
+
+---
+
+## Folder Structure
+```
+root/
+├── api/                     # FastAPI backend
+│   ├── main.py
+│   └── portfolio.py
+└── portfolio-pie/           # React frontend
+    └── Portfolio.jsx
+```
+
+---
+
+## Development
+
+### Backend (FastAPI)
+```bash
+cd api
+pip install fastapi uvicorn
+uvicorn main:app --reload
+```
+
+### Frontend (React)
+```bash
+cd portfolio-pie
+npm install
+npm start
+```
+
+---
+
+## Deployment
+
+- **Backend** deployed to Vercel at: `https://portfolio-pink-nine-zqqb57t52q.vercel.app`
+- **Frontend** deployed to Vercel at: `https://portfolio-pi-iota.vercel.app/`
+
+---
+
+## Notes
+
+- The app demonstrates portfolio rebalancing logic and dynamic visualization.
+- Designed for educational or demo purposes.
+- No persistence; all data is in-memory.
+
+---
+
+## Prompts & AI Assistance
+
+This project was partially developed using ChatGPT for basic FastAPI endpoints and frontend logic.
+
+**Prompt session**: [https://chatgpt.com/g/g-p-69613d837d348191a78d8c6ddf5631d6-fintual/project](https://chatgpt.com/g/g-p-69613d837d348191a78d8c6ddf5631d6-fintual/project)
+
+---
